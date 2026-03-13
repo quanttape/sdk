@@ -1,27 +1,15 @@
 """
 Quant Tape — The Last Line Before The Market.
 
-Security SDK for algorithmic trading.
-Zero latency. Zero exposure. Zero compromise.
+The security SDK for algorithmic trading.
 
 https://quanttape.com
 """
 
-__version__ = "0.0.3a1"
+__version__ = "0.0.9"
 __author__ = "Quant Tape LLC"
 
-def _welcome():
-    msg = f"""
-  ╔══════════════════════════════════════════════════╗
-  ║              QUANT TAPE  v{__version__}               ║
-  ║  Security middleware for algorithmic trading.    ║
-  ║                                                  ║
-  ║  Zero latency. Zero exposure. Zero compromise.   ║
-  ║                                                  ║
-  ║  Full SDK coming soon — join early access:       ║
-  ║  https://quanttape.com                           ║
-  ╚══════════════════════════════════════════════════╝
-"""
-    print(msg)
+from .scanner import SecretScanner, Finding
+from .rules import Rule, DEFAULT_RULES
 
-_welcome()
+__all__ = ["SecretScanner", "Finding", "Rule", "DEFAULT_RULES"]

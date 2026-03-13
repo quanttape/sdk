@@ -1,0 +1,168 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/main/sarif-2.1/schema/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "QuantTape",
+          "version": "0.0.9",
+          "rules": [
+            {
+              "id": "infinite-loop-risk",
+              "shortDescription": {
+                "text": "Infinite Loop Risk"
+              }
+            },
+            {
+              "id": "sleep-without-kill-switch",
+              "shortDescription": {
+                "text": "Sleep Without Kill Switch"
+              }
+            },
+            {
+              "id": "no-position-size-limit",
+              "shortDescription": {
+                "text": "No Position Size Limit"
+              }
+            },
+            {
+              "id": "hardcoded-ticker-symbol",
+              "shortDescription": {
+                "text": "Hardcoded Ticker Symbol"
+              }
+            },
+            {
+              "id": "no-error-handling-on-order",
+              "shortDescription": {
+                "text": "No Error Handling on Order"
+              }
+            },
+            {
+              "id": "market-order-without-limit",
+              "shortDescription": {
+                "text": "Market Order Without Limit"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "infinite-loop-risk",
+          "level": "note",
+          "message": {
+            "text": "Potential Infinite Loop Risk detected"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "tests/fixtures/trading_rule_hits.py"
+                },
+                "region": {
+                  "startLine": 4
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "sleep-without-kill-switch",
+          "level": "note",
+          "message": {
+            "text": "Potential Sleep Without Kill Switch detected"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "tests/fixtures/trading_rule_hits.py"
+                },
+                "region": {
+                  "startLine": 6
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "no-position-size-limit",
+          "level": "error",
+          "message": {
+            "text": "Potential No Position Size Limit detected"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "tests/fixtures/trading_rule_hits.py"
+                },
+                "region": {
+                  "startLine": 7
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "hardcoded-ticker-symbol",
+          "level": "note",
+          "message": {
+            "text": "Potential Hardcoded Ticker Symbol detected"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "tests/fixtures/trading_rule_hits.py"
+                },
+                "region": {
+                  "startLine": 8
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "no-error-handling-on-order",
+          "level": "note",
+          "message": {
+            "text": "Potential No Error Handling on Order detected"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "tests/fixtures/trading_rule_hits.py"
+                },
+                "region": {
+                  "startLine": 9
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "market-order-without-limit",
+          "level": "warning",
+          "message": {
+            "text": "Potential Market Order Without Limit detected"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "tests/fixtures/trading_rule_hits.py"
+                },
+                "region": {
+                  "startLine": 11
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
