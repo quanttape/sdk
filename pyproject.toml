@@ -1,0 +1,34 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "quanttape"
+version = "0.0.3a1"
+authors = [
+    { name = "Quant Tape LLC", email = "gode.prakash@gmail.com" },
+]
+description = "Security SDK for algorithmic trading. Zero latency. Zero exposure. Zero compromise."
+readme = "README.md"
+license = { text = "Proprietary" }
+requires-python = ">=3.8"
+classifiers = [
+    "Development Status :: 1 - Planning",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Intended Audience :: Developers",
+    "Topic :: Office/Business :: Financial :: Investment",
+    "Topic :: Security",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: OS Independent",
+]
+keywords = ["trading", "security", "algorithmic-trading", "sdk", "cybersecurity", "quant", "kill-switch"]
+
+[project.urls]
+Homepage = "https://quanttape.com"
+Repository = "https://github.com/quanttape/quanttape"
