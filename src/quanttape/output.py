@@ -5,7 +5,9 @@ from . import __version__
 from .scanner import Finding
 
 
-# ── Rich console formatter ────────────────────────────────────────────────────
+# --------------------------------------------------------------------------
+# Rich console formatter
+# --------------------------------------------------------------------------
 
 def _console_format(findings: List[Finding]) -> None:
     import sys
@@ -60,7 +62,7 @@ def _console_format(findings: List[Finding]) -> None:
             "LOW":      "◆",
         }
 
-        # Findings table — drop PREVIEW column on narrow terminals
+        # Findings table - drop PREVIEW column on narrow terminals
         term_width = console.width or 120
         show_preview = term_width >= 90
 
@@ -111,7 +113,9 @@ def _console_format(findings: List[Finding]) -> None:
         _stdout_utf8.close()
 
 
-# ── String-returning formatters for JSON / SARIF ─────────────────────────────
+# --------------------------------------------------------------------------
+# String-returning formatters for JSON / SARIF
+# --------------------------------------------------------------------------
 
 class JsonFormatter:
     def format(self, findings: List[Finding]) -> str:
@@ -132,7 +136,7 @@ class JsonFormatter:
 
 
 class SarifFormatter:
-    """SARIF 2.1.0 — works with GitHub Code Scanning and VS Code."""
+    """SARIF 2.1.0 - works with GitHub Code Scanning and VS Code."""
 
     def format(self, findings: List[Finding]) -> str:
         sarif = {
@@ -199,7 +203,9 @@ class SarifFormatter:
         return path.replace("\\", "/")
 
 
-# ── Public entry point ────────────────────────────────────────────────────────
+# --------------------------------------------------------------------------
+# Public entry point
+# --------------------------------------------------------------------------
 
 def format_results(findings: List[Finding], output_format: str = "console") -> str | None:
     """

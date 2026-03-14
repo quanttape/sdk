@@ -222,7 +222,7 @@ class _PythonContextBuilder(ast.NodeVisitor):
                 if any(hint in child.attr.lower() for hint in _SHUTDOWN_HINTS):
                     has_shutdown_hint = True
 
-        # require exit + (wait or shutdown hint) — a bare break with no
+        # require exit + (wait or shutdown hint) - a bare break with no
         # sleep/shutdown pattern is not enough to mark as safe
         if has_guarded_exit and (has_wait or has_shutdown_hint):
             return True
