@@ -1,4 +1,4 @@
-﻿import argparse
+import argparse
 import os
 import sys
 from pathlib import Path
@@ -12,7 +12,7 @@ from .scanner import Finding, SecretScanner
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="quanttape",
-        description="QuantTape - Security SDK for algorithmic trading.",
+        description="QuantTape - Trading-aware local security scanner for bots, strategies, and execution code.",
     )
     parser.add_argument(
         "--version", action="version", version=f"%(prog)s {__version__}"

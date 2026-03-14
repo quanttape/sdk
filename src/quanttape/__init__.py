@@ -1,12 +1,12 @@
 """
-Quant Tape — The Last Line Before The Market.
+Quant Tape - The Last Line Before The Market.
 
-The security SDK for algorithmic trading.
+Trading-aware local security scanner for bots, strategies, and execution code.
 
 https://quanttape.com
 """
 
-__version__ = "0.0.9"
+__version__ = "0.0.11"
 __author__ = "Quant Tape LLC"
 
 from .scanner import SecretScanner, Finding
