@@ -65,13 +65,16 @@ def _print_banner(output_format: str) -> None:
     import sys
     from rich.console import Console
     from rich.text import Text
-    console = Console(force_terminal=True, highlight=False,
-                      file=open(sys.stdout.fileno(), mode="w", encoding="utf-8", closefd=False))
-    msg = Text()
-    msg.append("  Scanning", style="dim")
-    msg.append(" for credential exposure and security vulnerabilities", style="dim")
-    msg.append("...", style="bold green")
-    console.print(msg)
+    fh = open(sys.stdout.fileno(), mode="w", encoding="utf-8", closefd=False)
+    try:
+        console = Console(force_terminal=True, highlight=False, file=fh)
+        msg = Text()
+        msg.append("  Scanning", style="dim")
+        msg.append(" for credential exposure and security vulnerabilities", style="dim")
+        msg.append("...", style="bold green")
+        console.print(msg)
+    finally:
+        fh.close()
 
 
 def _git_history_root(path: str) -> str:
@@ -85,7 +88,7 @@ def main() -> None:
 
     if args.command != "scan":
         parser.print_help()
-        sys.exit(1)
+        sys.exit(0)
 
     _print_banner(args.output)
 

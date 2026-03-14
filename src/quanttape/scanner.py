@@ -5,7 +5,7 @@ import re
 from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Set
 
 from .rules import DEFAULT_RULES, Rule, load_custom_rules
 
@@ -99,9 +99,9 @@ class Finding:
 
 @dataclass
 class PythonScanContext:
-    safe_order_submission_lines: set[int] = field(default_factory=set)
-    safe_market_order_lines: set[int] = field(default_factory=set)
-    safe_true_loop_lines: set[int] = field(default_factory=set)
+    safe_order_submission_lines: Set[int] = field(default_factory=set)
+    safe_market_order_lines: Set[int] = field(default_factory=set)
+    safe_true_loop_lines: Set[int] = field(default_factory=set)
 
 
 def _mask_secret(text: str, visible_chars: int = 8) -> str:
@@ -132,7 +132,7 @@ def _call_name(node: ast.AST) -> str:
 
 class _PythonContextBuilder(ast.NodeVisitor):
     def __init__(self) -> None:
-        self._function_stack: list[str] = []
+        self._function_stack: List[str] = []
         self._try_depth = 0
         self.context = PythonScanContext()
 
@@ -172,7 +172,7 @@ class _PythonContextBuilder(ast.NodeVisitor):
 
         self.generic_visit(node)
 
-    def _mark_node_lines(self, node: ast.AST, target: set[int]) -> None:
+    def _mark_node_lines(self, node: ast.AST, target: Set[int]) -> None:
         start = getattr(node, "lineno", None)
         end = getattr(node, "end_lineno", start)
         if start is None:
@@ -222,7 +222,7 @@ class _PythonContextBuilder(ast.NodeVisitor):
                 if any(hint in child.attr.lower() for hint in _SHUTDOWN_HINTS):
                     has_shutdown_hint = True
 
-        # require exit + (wait or shutdown hint) — a bare break with no
+        # require exit + (wait or shutdown hint) - a bare break with no
         # sleep/shutdown pattern is not enough to mark as safe
         if has_guarded_exit and (has_wait or has_shutdown_hint):
             return True
@@ -231,6 +231,14 @@ class _PythonContextBuilder(ast.NodeVisitor):
             if isinstance(stmt, (ast.Break, ast.Return, ast.Raise)):
                 return True
         return has_wait and has_shutdown_hint
+
+
+_ENTROPY_PATTERN = re.compile(
+    r'''(?i)(?:secret|token|key|credential|auth|password|passwd|'''
+    r'''config|endpoint_auth|broker_credential|api_credential|'''
+    r'''alpaca_config|binance_config|ib_config|kraken_config|'''
+    r'''live_endpoint|access_key|private_key)\s*[=:]\s*['"]?([A-Za-z0-9+/=_\-]{20,})['"]?'''
+)
 
 
 class SecretScanner:
@@ -421,13 +429,7 @@ class SecretScanner:
     def _entropy_check(self, filepath: str, line_num: int, line: str) -> List[Finding]:
         """catches high-entropy strings the regex rules miss"""
         findings: List[Finding] = []
-        assign_pattern = re.compile(
-            r'''(?i)(?:secret|token|key|credential|auth|password|passwd|'''
-            r'''config|endpoint_auth|broker_credential|api_credential|'''
-            r'''alpaca_config|binance_config|ib_config|kraken_config|'''
-            r'''live_endpoint|access_key|private_key)\s*[=:]\s*['"]?([A-Za-z0-9+/=_\-]{20,})['"]?'''
-        )
-        for match in assign_pattern.finditer(line):
+        for match in _ENTROPY_PATTERN.finditer(line):
             value = match.group(1)
             if len(value) >= self.MIN_ENTROPY_LENGTH:
                 entropy = _shannon_entropy(value)
