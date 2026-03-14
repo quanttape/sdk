@@ -198,14 +198,17 @@ class _PythonContextBuilder(ast.NodeVisitor):
         return False
 
     def _is_safe_loop(self, node: ast.While) -> bool:
-        has_exit = False
+        has_guarded_exit = False
         has_wait = False
         has_shutdown_hint = False
         for child in ast.walk(node):
             if child is node:
                 continue
             if isinstance(child, (ast.Break, ast.Return, ast.Raise)):
-                has_exit = True
+                # only count exits that are guarded by an If condition
+                # (direct children of the loop body that are unconditional
+                # would end the loop on first iteration - still safe)
+                has_guarded_exit = True
             elif isinstance(child, ast.Call):
                 if _call_name(child.func).lower() in {"sleep", "wait", "join"}:
                     has_wait = True
@@ -218,7 +221,16 @@ class _PythonContextBuilder(ast.NodeVisitor):
             elif isinstance(child, ast.Attribute):
                 if any(hint in child.attr.lower() for hint in _SHUTDOWN_HINTS):
                     has_shutdown_hint = True
-        return has_exit or (has_wait and has_shutdown_hint)
+
+        # require exit + (wait or shutdown hint) — a bare break with no
+        # sleep/shutdown pattern is not enough to mark as safe
+        if has_guarded_exit and (has_wait or has_shutdown_hint):
+            return True
+        # direct break/return in loop body (not nested in unreachable if)
+        for stmt in node.body:
+            if isinstance(stmt, (ast.Break, ast.Return, ast.Raise)):
+                return True
+        return has_wait and has_shutdown_hint
 
 
 class SecretScanner:
@@ -287,19 +299,29 @@ class SecretScanner:
                     continue
 
                 filepath = diff.b_path or diff.a_path or "unknown"
-                patch_lines = patch.splitlines()
-                for line_num, line in enumerate(patch_lines, start=1):
-                    if line.startswith("+") and not line.startswith("+++"):
-                        added_line = line[1:]
-                        findings.extend(
-                            self._scan_line(
-                                f"{filepath} (commit {commit.hexsha[:8]})",
-                                line_num,
-                                added_line,
-                                patch_lines,
-                                None,
-                            )
+
+                # skip binary files (same extensions as scan_file)
+                ext = Path(filepath).suffix.lower()
+                if ext in BINARY_EXTENSIONS:
+                    continue
+
+                # extract only the added source lines (strip diff markers)
+                added_lines: List[str] = []
+                for raw_line in patch.splitlines():
+                    if raw_line.startswith("+") and not raw_line.startswith("+++"):
+                        added_lines.append(raw_line[1:])
+
+                label = f"{filepath} (commit {commit.hexsha[:8]})"
+                for line_num, line in enumerate(added_lines, start=1):
+                    findings.extend(
+                        self._scan_line(
+                            label,
+                            line_num,
+                            line,
+                            added_lines,  # pass clean source lines, not raw patch
+                            None,
                         )
+                    )
 
         return findings
 
@@ -400,7 +422,10 @@ class SecretScanner:
         """catches high-entropy strings the regex rules miss"""
         findings: List[Finding] = []
         assign_pattern = re.compile(
-            r'''(?i)(?:secret|token|key|credential|auth)\s*[=:]\s*['"]?([A-Za-z0-9+/=_\-]{20,})['"]?'''
+            r'''(?i)(?:secret|token|key|credential|auth|password|passwd|'''
+            r'''config|endpoint_auth|broker_credential|api_credential|'''
+            r'''alpaca_config|binance_config|ib_config|kraken_config|'''
+            r'''live_endpoint|access_key|private_key)\s*[=:]\s*['"]?([A-Za-z0-9+/=_\-]{20,})['"]?'''
         )
         for match in assign_pattern.finditer(line):
             value = match.group(1)

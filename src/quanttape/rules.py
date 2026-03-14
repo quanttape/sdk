@@ -197,9 +197,10 @@ TRADING_LOGIC_RULES: List[Rule] = [
     Rule(
         name="No Position Size Limit",
         pattern=r"(?ix)"
-                r"^\s*(?:qty|quantity|shares|size)\s*=\s*"
+                r"^\s*(?:qty|quantity|shares|size|order_qty|n_shares|num_shares|trade_qty|lot_size|amount)\s*=\s*"
                 r"(?!.*\b(?:min|max|cap|limit|notional|risk|budget|clip|clamp)\b)"
-                r"\(?\s*(?:balance|equity|portfolio_value|buying_power)\b\s*(?:[*/]|//)",
+                r"\(?\s*(?:balance|equity|portfolio_value|buying_power|cash|"
+                r"account\.cash|account\.equity|get_portfolio_value\(\)|get_buying_power\(\))\b\s*(?:[*/]|//)",
         severity="HIGH",
         description="Position size appears to be derived directly from full account buying power/equity without an explicit cap or risk budget.",
     ),
