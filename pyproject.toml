@@ -37,6 +37,8 @@ git = ["gitpython"]
 quanttape = "quanttape.cli:main"
 
 [project.urls]
-Homepage = "https://quanttape.com"
-Repository = "https://github.com/quanttape/sdk"
+"Homepage" = "https://quanttape.com"
+"Repository" = "https://github.com/quanttape/sdk"
+"Issues" = "https://github.com/quanttape/sdk/issues"
+"Documentation" = "https://quanttape.com/docs"
 
