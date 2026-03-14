@@ -53,13 +53,16 @@ def _console_format(findings: List[Finding]) -> None:
         "LOW":      "dim white",
     }
     severity_icon = {
-        "CRITICAL": "✖",
-        "HIGH":     "⚠",
+        "CRITICAL": "◆",
+        "HIGH":     "◆",
         "MEDIUM":   "◆",
-        "LOW":      "·",
+        "LOW":      "◆",
     }
 
-    # Findings table
+    # Findings table — drop PREVIEW column on narrow terminals
+    term_width = console.width or 120
+    show_preview = term_width >= 90
+
     table = Table(
         box=box.SIMPLE_HEAD,
         show_header=True,
@@ -67,22 +70,25 @@ def _console_format(findings: List[Finding]) -> None:
         padding=(0, 1),
         expand=True,
     )
-    table.add_column("SEV", width=10)
-    table.add_column("RULE", ratio=2)
-    table.add_column("LOCATION", ratio=1)
-    table.add_column("PREVIEW", ratio=3)
+    table.add_column("SEV", width=14, no_wrap=True)
+    table.add_column("RULE", min_width=20, no_wrap=True, overflow="ellipsis")
+    table.add_column("FILE", min_width=16, no_wrap=True)
+    if show_preview:
+        table.add_column("PREVIEW", no_wrap=True, overflow="ellipsis")
 
     for f in findings:
         style = severity_style.get(f.severity, "white")
-        icon  = severity_icon.get(f.severity, "·")
+        icon  = severity_icon.get(f.severity, "◆")
         sev_text = Text(f"{icon}  {f.severity}", style=style)
         short_path = f"{Path(f.file).name}:{f.line}"
-        table.add_row(
+        row = [
             sev_text,
             Text(f.secret_type, style="white"),
             Text(short_path, style="dim cyan"),
-            Text(f.match_preview, style="dim"),
-        )
+        ]
+        if show_preview:
+            row.append(Text(f.match_preview, style="dim"))
+        table.add_row(*row)
 
     console.print(
         Panel(table, title="[bold]FINDINGS[/bold]", box=box.ROUNDED,
@@ -98,6 +104,7 @@ def _console_format(findings: List[Finding]) -> None:
         if n:
             summary.append(f"{n} {sev.lower()}  ", style=severity_style[sev])
     console.print(summary)
+    console.print(Text("  * previews are partially redacted for safety", style="dim"))
     console.print()
 
 

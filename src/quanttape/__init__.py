@@ -6,7 +6,7 @@ Trading-aware local security scanner for bots, strategies, and execution code.
 https://quanttape.com
 """
 
-__version__ = "0.0.13"
+__version__ = "0.0.14"
 __author__ = "Quant Tape LLC"
 
 from .scanner import SecretScanner, Finding
