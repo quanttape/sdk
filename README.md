@@ -61,3 +61,4 @@ quanttape scan my_bot.py --generic-mode
 - Zero-Knowledge Vault - encrypted local-first credential storage
 
 Join the waitlist: [quanttape.com](https://quanttape.com)
+
