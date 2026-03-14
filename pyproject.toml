@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "quanttape"
-version = "0.0.11"
+version = "0.0.13"
 authors = [
     { name = "Quant Tape LLC", email = "gode.prakash@gmail.com" },
 ]
@@ -12,7 +12,7 @@ description = "Trading-aware local security scanner for bots, strategies, and ex
 readme = "README.md"
 license = { text = "Proprietary" }
 requires-python = ">=3.8"
-dependencies = ["pyyaml"]
+dependencies = ["pyyaml", "rich>=13.0"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Financial and Insurance Industry",

@@ -62,8 +62,16 @@ def build_parser() -> argparse.ArgumentParser:
 def _print_banner(output_format: str) -> None:
     if output_format != "console":
         return
-    print(f"\n  QuantTape Scanner v{__version__}")
-    print("  Scanning for credential exposure and security vulnerabilities...\n")
+    import sys
+    from rich.console import Console
+    from rich.text import Text
+    console = Console(force_terminal=True, highlight=False,
+                      file=open(sys.stdout.fileno(), mode="w", encoding="utf-8", closefd=False))
+    msg = Text()
+    msg.append("  Scanning", style="dim")
+    msg.append(" for credential exposure and security vulnerabilities", style="dim")
+    msg.append("...", style="bold green")
+    console.print(msg)
 
 
 def _git_history_root(path: str) -> str:
@@ -100,7 +108,8 @@ def main() -> None:
         findings.extend(scanner.scan_git_history(_git_history_root(args.path)))
 
     output = format_results(findings, args.output)
-    print(output)
+    if output is not None:
+        print(output)
 
     if findings:
         sys.exit(1)

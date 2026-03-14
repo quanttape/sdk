@@ -104,10 +104,11 @@ class PythonScanContext:
     safe_true_loop_lines: set[int] = field(default_factory=set)
 
 
-def _mask_secret(text: str, visible_chars: int = 4) -> str:
-    if len(text) <= visible_chars:
-        return "*" * len(text)
-    return text[:visible_chars] + "*" * (len(text) - visible_chars)
+def _mask_secret(text: str, visible_chars: int = 8) -> str:
+    stripped = text.strip()
+    if len(stripped) <= visible_chars:
+        return stripped[:2] + "*" * max(0, len(stripped) - 2)
+    return stripped[:visible_chars] + "*" * (len(stripped) - visible_chars)
 
 
 def _shannon_entropy(data: str) -> float:
