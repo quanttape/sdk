@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "quanttape"
-version = "0.0.13"
+version = "0.0.15"
 authors = [
     { name = "Quant Tape LLC", email = "info@quanttape.com" },
 ]
@@ -40,5 +40,4 @@ quanttape = "quanttape.cli:main"
 "Homepage" = "https://quanttape.com"
 "Repository" = "https://github.com/quanttape/sdk"
 "Issues" = "https://github.com/quanttape/sdk/issues"
-"Documentation" = "https://quanttape.com/docs"
 
