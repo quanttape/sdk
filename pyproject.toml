@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "quanttape"
 version = "0.0.13"
 authors = [
-    { name = "Quant Tape LLC", email = "gode.prakash@gmail.com" },
+    { name = "Quant Tape LLC", email = "info@quanttape.com" },
 ]
 description = "Trading-aware local security scanner for bots, strategies, and execution code."
 readme = "README.md"
