@@ -38,5 +38,5 @@ quanttape = "quanttape.cli:main"
 
 [project.urls]
 Homepage = "https://quanttape.com"
-Repository = "https://github.com/quanttape/quanttape"
+Repository = "https://github.com/quanttape/sdk"
 
