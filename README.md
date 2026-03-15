@@ -1,63 +1,101 @@
-# Quant Tape
+# QuantTape
 
-**The Last Line Before The Market.**
+Local security scanner and egress firewall for trading bots and AI agents.
 
-Quant Tape is a local security scanner for trading bots and algorithmic trading code.
-It finds exposed broker keys, embedded credentials, and risky execution patterns before they hit production.
-
-- Local-first - scans your files, repos, and optional git history without uploading code
-- Trading-aware - built for broker wrappers, sizing logic, execution flows, and bot loops
-- CI-ready - outputs findings as Console, JSON, and SARIF
-
-## What The SDK Does Today
-
-Quant Tape currently ships with a scanner built for trading codebases.
-
-- Detects **33 built-in rules** across credentials, broker secrets, and trading-code risk patterns
-- Suppresses obvious false positives in common trading-bot structures
-- Scans single files, full directories, and optional git history
-- Fits local development, pre-commit checks, and CI pipelines
-- Exports findings as Console, JSON, or SARIF
-
-## What It Looks For
-
-- Hardcoded broker/API secrets
-- Embedded credentials and webhook URLs
-- Unsafe market-order usage
-- Full-account position sizing without caps
-- Busy loops and risky blocking sleeps
-- Hardcoded trading symbols and other reusable-bot mistakes
-
-Supported broker and market-data patterns include:
-
-- Alpaca
-- Binance
-- Coinbase
-- Interactive Brokers
-- Kraken
-- TD Ameritrade / Schwab
-- Tradier
-- Polygon.io
+[![PyPI](https://img.shields.io/pypi/v/quanttape)](https://pypi.org/project/quanttape/)
+[![Tests](https://github.com/quanttape/sdk/actions/workflows/test.yml/badge.svg)](https://github.com/quanttape/sdk/actions/workflows/test.yml)
+[![Python](https://img.shields.io/pypi/pyversions/quanttape)](https://pypi.org/project/quanttape/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 ## Quick Start
 
-### CLI
+Install:
 
 ```bash
 pip install quanttape
-quanttape scan my_bot.py
-quanttape scan ./my_project/ --output json
-quanttape scan ./my_project/ --git-history
 ```
 
-Default behavior is trading-aware scanning.
-If you want generic raw scanning behavior instead:
+Scan your code for secrets:
 
 ```bash
+quanttape scan my_bot.py
+```
+
+Start the Guard proxy to block secrets in outbound requests:
+
+```bash
+pip install quanttape[guard]
+quanttape guard --mode agent
+```
+
+Test it:
+
+```bash
+curl -x http://127.0.0.1:8080 \
+     --cacert ~/.quanttape/ca.pem \
+     "https://api.example.com/data?token=ghp_a1b2c3SECRET"
+```
+
+```
+403 Forbidden
+X-QuantTape-Action: blocked
+{"error": "QuantTape Guard: request blocked", "allowed": false, "reason": "Blocked: 1 secret(s) detected"}
+```
+
+Everything runs locally. No cloud service required.
+
+---
+
+## What QuantTape Does
+
+### Scanner
+
+Static detection of secrets and risky patterns in code and files.
+
+- **33+ built-in rules** across credentials, broker secrets, and trading-code risk patterns
+- Suppresses false positives in common trading-bot structures
+- Scans single files, directories, and git history
+- Outputs Console, JSON, or SARIF
+
+### Guard
+
+Local egress proxy that intercepts outbound HTTP/HTTPS requests and blocks secrets before they leave your machine.
+
+- HTTPS interception via locally generated CA
+- Inspects URLs, headers, and request bodies
+- Deterministic block-or-forward decision
+- JSON audit logging to `~/.quanttape/guard.log`
+- Real-client MITM validated with curl, requests, and httpx (24/24 tests passing)
+
+## What It Looks For
+
+- Hardcoded broker/API secrets (Alpaca, Binance, Coinbase, IB, Kraken, Tradier, Polygon)
+- AWS, GCP, Azure, Slack, Telegram, JWT credentials
+- SSH private keys, `.env` content, webhook URLs
+- Unsafe market-order usage, position sizing without caps
+- Busy loops, risky blocking sleeps, hardcoded symbols
+
+## Scanner CLI
+
+```bash
+quanttape scan my_bot.py
+quanttape scan ./my_project/ --output json
+quanttape scan ./my_project/ --output sarif
+quanttape scan ./my_project/ --git-history
 quanttape scan my_bot.py --generic-mode
 ```
 
-### Python SDK
+## Guard CLI
+
+```bash
+quanttape guard                     # start on :8080
+quanttape guard --port 9090         # custom port
+quanttape guard --mode agent        # credential + general rules
+quanttape guard --mode trading      # all rules including broker + trading logic
+quanttape guard --mode all          # everything (default)
+```
+
+## Python SDK
 
 ```python
 from quanttape import SecretScanner
@@ -70,24 +108,11 @@ findings = scanner.scan_file("my_bot.py")
 # Scan an entire directory
 findings = scanner.scan_directory("./trading_bots/")
 
-# Check results
 for f in findings:
     print(f"{f.severity} | {f.secret_type} | {f.file}:{f.line}")
 ```
 
-With custom rules or generic mode:
-
-```python
-from quanttape import SecretScanner
-
-scanner = SecretScanner(
-    config_path="my_rules.yaml",    # custom rules file
-    trading_bot_mode=False,          # generic scanning (no AST suppression)
-)
-findings = scanner.scan_directory("./src/")
-```
-
-#### Output Formats
+### Output Formats
 
 ```python
 from quanttape import SecretScanner
@@ -95,32 +120,27 @@ from quanttape.output import format_results
 
 findings = SecretScanner().scan_directory("./bots/")
 
-# Rich console output (prints directly)
-format_results(findings, "console")
-
-# JSON string
+format_results(findings, "console")  # rich terminal output
 json_output = format_results(findings, "json")
-
-# SARIF string (for GitHub Code Scanning, VS Code, CI)
 sarif_output = format_results(findings, "sarif")
 ```
 
-#### Finding Object
-
-Each finding has these attributes:
+### Finding Object
 
 | Attribute | Type | Description |
 |-----------|------|-------------|
 | `file` | `str` | Path to the file |
 | `line` | `int` | Line number |
-| `secret_type` | `str` | Rule that matched (e.g. "Alpaca API Key") |
+| `secret_type` | `str` | Rule that matched |
 | `severity` | `str` | `CRITICAL`, `HIGH`, `MEDIUM`, or `LOW` |
-| `match_preview` | `str` | Partially redacted preview of the match |
+| `match_preview` | `str` | Partially redacted preview |
 
-## Coming Soon
+## License
 
-- Guard SDK - runtime trade validation, kill-switch, drawdown controls
-- Zero-Knowledge Vault - encrypted local-first credential storage
+[MIT](LICENSE)
 
-Join the waitlist: [quanttape.com](https://quanttape.com)
+## Links
 
+- [Website](https://quanttape.com)
+- [Guard](https://quanttape.com/guard)
+- [Changelog](CHANGELOG.md)
