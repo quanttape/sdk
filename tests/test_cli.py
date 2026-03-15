@@ -52,17 +52,18 @@ class CliTests(unittest.TestCase):
             self.assertNotIn(f"QuantTape Scanner v{__version__}", output)
 
     def test_main_git_history_uses_repo_root_for_file_scan(self):
-        with patch("quanttape.cli.os.path.isfile", return_value=True), \
-             patch("quanttape.cli.os.path.isdir", return_value=False), \
-             patch("quanttape.cli.SecretScanner") as scanner_cls, \
-             patch("quanttape.cli._print_banner"), \
-             patch("quanttape.cli.format_results", return_value=None), \
-             patch("sys.argv", ["quanttape", "scan", r"E:\repo\bot.py", "--git-history"]):
-            scanner = scanner_cls.return_value
-            scanner.scan_file.return_value = []
-            scanner.scan_git_history.return_value = []
-            main()
-            scanner.scan_git_history.assert_called_once_with(r"E:\repo")
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            bot_file = Path(tmp_dir) / "bot.py"
+            bot_file.write_text("x = 1\n", encoding="utf-8")
+            with patch("quanttape.cli.SecretScanner") as scanner_cls, \
+                 patch("quanttape.cli._print_banner"), \
+                 patch("quanttape.cli.format_results", return_value=None), \
+                 patch("sys.argv", ["quanttape", "scan", str(bot_file), "--git-history"]):
+                scanner = scanner_cls.return_value
+                scanner.scan_file.return_value = []
+                scanner.scan_git_history.return_value = []
+                main()
+                scanner.scan_git_history.assert_called_once_with(tmp_dir)
 
 
 if __name__ == "__main__":

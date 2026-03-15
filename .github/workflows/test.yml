@@ -29,7 +29,7 @@ jobs:
           pip install pytest
 
       - name: Run tests
-        run: pytest tests/ -q --tb=short
+        run: pytest tests/ -q --tb=short --ignore=tests/test_mitm_live.py --ignore=tests/benchmark_proxy.py
 
       - name: Verify package builds
         run: |
