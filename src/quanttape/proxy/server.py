@@ -106,7 +106,7 @@ async def _read_body(reader, content_length: int, headers: dict) -> tuple:
         return b"", None
 
     if not _is_text_content(headers):
-        return body_bytes, None  # binary content — skip scanning
+        return body_bytes, None  # binary content -- skip scanning
 
     body_text = _decode_body(body_bytes, headers)
     return body_bytes, body_text
@@ -325,7 +325,7 @@ class GuardProxy:
         server_ctx.load_cert_chain(host_cert_path, host_key_path)
 
         # Upgrade the existing client connection to TLS using start_tls.
-        # Reuse the existing protocol/reader — start_tls reconnects them
+        # Reuse the existing protocol/reader -- start_tls reconnects them
         # to the new TLS transport automatically. This approach works
         # correctly on both Windows (ProactorEventLoop) and Unix.
         loop = asyncio.get_event_loop()

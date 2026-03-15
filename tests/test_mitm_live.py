@@ -690,7 +690,7 @@ def print_matrix():
         return
 
     print("\n" + "=" * 80)
-    print("  QUANTTAPE GUARD — REAL-CLIENT MITM VALIDATION MATRIX")
+    print("  QUANTTAPE GUARD -- REAL-CLIENT MITM VALIDATION MATRIX")
     print("=" * 80)
 
     clients = {}

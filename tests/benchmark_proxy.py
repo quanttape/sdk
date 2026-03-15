@@ -1,4 +1,4 @@
-"""QuantTape Guard — Proxy Benchmark Harness.
+"""QuantTape Guard -- Proxy Benchmark Harness.
 
 Measures latency overhead across dimensions:
   - Protocol: HTTP vs HTTPS (MITM)
@@ -305,7 +305,7 @@ def run_benchmark():
 
     # ── Report ────────────────────────────────────────────────────
     print("\n" + "=" * 90)
-    print("  QUANTTAPE GUARD — BENCHMARK REPORT")
+    print("  QUANTTAPE GUARD -- BENCHMARK REPORT")
     print("=" * 90)
 
     print(f"\n  Baseline (direct HTTP, no proxy): "

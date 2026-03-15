@@ -252,7 +252,7 @@ class TestProxyE2E(unittest.TestCase):
                 body=binary_body,
             )
         )
-        # Should forward successfully (200 from upstream) — not blocked
+        # Should forward successfully (200 from upstream) -- not blocked
         self.assertEqual(status, 200)
 
     def test_gzip_body_scanned(self):

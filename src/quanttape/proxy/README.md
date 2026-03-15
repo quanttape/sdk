@@ -1,4 +1,4 @@
-# QuantTape Guard — Proxy Module Technical Reference
+# QuantTape Guard -- Proxy Module Technical Reference
 
 ## Overview
 
@@ -82,7 +82,7 @@ When `cryptography` is not installed or cert generation fails:
 Client ◀──TCP──▶ _blind_tunnel() ◀──TCP──▶ Upstream
 ```
 
-Bidirectional byte relay with no inspection. Data passes through unmodified. This is the graceful degradation path — Guard still runs but HTTPS content is opaque.
+Bidirectional byte relay with no inspection. Data passes through unmodified. This is the graceful degradation path -- Guard still runs but HTTPS content is opaque.
 
 ---
 
@@ -97,7 +97,7 @@ scan_request(url, headers, body, rules=None, mode="agent") -> List[Finding]
 
 **How it differs from the scanner:**
 - No AST parsing (HTTP payloads aren't Python source)
-- No file I/O — operates on in-memory strings
+- No file I/O -- operates on in-memory strings
 - Scans URL, each header value, and each body line independently
 - Same regex patterns + Shannon entropy (threshold: 4.5, min length: 20 chars)
 - Sources are tagged as `url`, `header:{name}`, or `body:L{n}`
@@ -137,9 +137,9 @@ scan_request(url, headers, body, rules=None, mode="agent") -> List[Finding]
 ```
 
 **Stats tracking (in-memory):**
-- `requests_scanned` — total requests evaluated
-- `requests_blocked` — requests denied
-- `rules_triggered` — total individual rule hits
+- `requests_scanned` -- total requests evaluated
+- `requests_blocked` -- requests denied
+- `rules_triggered` -- total individual rule hits
 
 ---
 
@@ -189,8 +189,8 @@ The user must explicitly trust the CA cert. `quanttape setup-certs` prints platf
 - Minimal dependency footprint: only `httpx` for HTTP forwarding, `cryptography` for certs
 
 **Key classes:**
-- `GuardConfig` — dataclass: port, host, mode, config_path, no_verify
-- `GuardProxy` — main proxy handler with connection routing
+- `GuardConfig` -- dataclass: port, host, mode, config_path, no_verify
+- `GuardProxy` -- main proxy handler with connection routing
 
 **Methods:**
 | Method | Role |
@@ -216,8 +216,8 @@ Modes filter which rules are active:
 
 | Mode | Categories loaded | Use case |
 |---|---|---|
-| `agent` | `credential` | AI agent egress — catches secrets, skips trading logic |
-| `trading` | `credential`, `broker`, `trading_logic` | Trading bot egress — full broker key + logic checks |
+| `agent` | `credential` | AI agent egress -- catches secrets, skips trading logic |
+| `trading` | `credential`, `broker`, `trading_logic` | Trading bot egress -- full broker key + logic checks |
 | `all` | Everything | No filter, all rules active |
 
 Mode filtering happens in `rules.get_rules_for_mode()`. The bridge calls this when no explicit rule list is provided.
@@ -242,7 +242,7 @@ Mode filtering happens in `rules.get_rules_for_mode()`. The bridge calls this wh
 - Rules are compiled once per `scan_request()` call, not per line
 - Entropy check only runs on tokens >= 20 chars matching `[A-Za-z0-9/+=_-]{20,}`
 - HTTP forwarding uses httpx async client with connection pooling
-- Per-host certs are cached to disk — only generated once per hostname
+- Per-host certs are cached to disk -- only generated once per hostname
 - No disk I/O in the hot path (scan is pure in-memory regex)
 - **Measured latency (localhost, httpx client, 20 iterations per scenario):**
 

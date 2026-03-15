@@ -1,12 +1,12 @@
 # Changelog
 
-## 0.0.20 — Real-Client MITM Validation
+## 0.0.20 -- Real-Client MITM Validation
 
 **Release date:** 2026-03-14
 
 This release marks the transition from "structurally validated" to "live MITM validated." The HTTPS interception path has been proven end-to-end with real HTTP clients through a trusted local CA.
 
-### HTTPS MITM — Now Real-Client Validated
+### HTTPS MITM -- Now Real-Client Validated
 
 - Validated with **curl**, **requests**, and **httpx** using a trusted local CA
 - 24 MITM live-validation tests covering: clean forward, blocked request, untrusted CA failure, secret in URL/header/body, binary passthrough, gzip body scanning, large body forwarding
