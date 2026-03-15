@@ -10,13 +10,14 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 from quanttape import __version__
-from quanttape.output import ConsoleFormatter, SarifFormatter
+from quanttape.output import format_results, SarifFormatter
 from quanttape.scanner import Finding
 
 
 class OutputTests(unittest.TestCase):
-    def test_console_formatter_empty_message_is_generic(self):
-        self.assertEqual(ConsoleFormatter().format([]), "No findings detected.")
+    def test_console_format_empty_returns_none(self):
+        result = format_results([], "console")
+        self.assertIsNone(result)
 
     def test_sarif_formatter_uses_package_version_and_normalized_uri(self):
         finding = Finding(

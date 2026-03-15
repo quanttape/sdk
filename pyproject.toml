@@ -4,11 +4,11 @@ build-backend = "hatchling.build"
 
 [project]
 name = "quanttape"
-version = "0.0.17"
+version = "0.0.20"
 authors = [
     { name = "Quant Tape LLC", email = "info@quanttape.com" },
 ]
-description = "Trading-aware local security scanner for bots, strategies, and execution code."
+description = "Local-first security scanner and egress proxy for trading bots and AI agents."
 readme = "README.md"
 license = { text = "Proprietary" }
 requires-python = ">=3.8"
@@ -28,10 +28,11 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Operating System :: OS Independent",
 ]
-keywords = ["trading", "security", "algorithmic-trading", "sdk", "cybersecurity", "quant", "kill-switch"]
+keywords = ["trading", "security", "algorithmic-trading", "sdk", "cybersecurity", "quant", "kill-switch", "ai-agent", "egress-proxy", "dlp"]
 
 [project.optional-dependencies]
 git = ["gitpython"]
+guard = ["httpx>=0.24.0", "cryptography>=41.0.0"]
 
 [project.scripts]
 quanttape = "quanttape.cli:main"

@@ -56,6 +56,38 @@ def build_parser() -> argparse.ArgumentParser:
         help="Disable trading-bot suppressions and use generic raw scanning behavior.",
     )
 
+    # --- guard subcommand ---
+    guard_parser = subparsers.add_parser(
+        "guard", help="Start egress proxy to intercept outbound HTTP and block secret leakage"
+    )
+    guard_parser.add_argument(
+        "--port", type=int, default=8080, help="Port to listen on (default: 8080)"
+    )
+    guard_parser.add_argument(
+        "--host", default="127.0.0.1", help="Host to bind to (default: 127.0.0.1)"
+    )
+    guard_parser.add_argument(
+        "--mode",
+        choices=["agent", "trading", "all"],
+        default="agent",
+        help="Rule mode: agent (credential+general), trading (all trading rules), all (default: agent)",
+    )
+    guard_parser.add_argument(
+        "--config", help="Path to custom rules YAML file"
+    )
+    guard_parser.add_argument(
+        "--no-verify",
+        action="store_true",
+        default=False,
+        help="Skip upstream TLS certificate verification (for testing only)",
+    )
+
+    # --- setup-certs subcommand ---
+    subparsers.add_parser(
+        "setup-certs",
+        help="Generate local CA certificate for HTTPS inspection and print trust instructions",
+    )
+
     return parser
 
 
@@ -82,9 +114,47 @@ def _git_history_root(path: str) -> str:
     return str(target if target.is_dir() else target.parent)
 
 
+def _run_guard(args) -> None:
+    try:
+        from .proxy.server import GuardConfig, run_guard
+    except ImportError:
+        print(
+            "Error: Guard requires extra dependencies.\n"
+            "Install with: pip install quanttape[guard]",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    config = GuardConfig(
+        port=args.port,
+        host=args.host,
+        mode=args.mode,
+        config_path=getattr(args, "config", None),
+        no_verify=getattr(args, "no_verify", False),
+    )
+    run_guard(config)
+
+
 def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
+
+    if args.command == "guard":
+        _run_guard(args)
+        return
+
+    if args.command == "setup-certs":
+        try:
+            from .proxy.certs import setup_certs_interactive
+        except ImportError:
+            print(
+                "Error: Guard requires extra dependencies.\n"
+                "Install with: pip install quanttape[guard]",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+        setup_certs_interactive()
+        return
 
     if args.command != "scan":
         parser.print_help()

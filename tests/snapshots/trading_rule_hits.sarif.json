@@ -6,7 +6,7 @@
       "tool": {
         "driver": {
           "name": "QuantTape",
-          "version": "0.0.9",
+          "version": "0.0.20",
           "rules": [
             {
               "id": "infinite-loop-risk",

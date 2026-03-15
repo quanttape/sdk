@@ -55,8 +55,9 @@ class CliTests(unittest.TestCase):
         with patch("quanttape.cli.os.path.isfile", return_value=True), \
              patch("quanttape.cli.os.path.isdir", return_value=False), \
              patch("quanttape.cli.SecretScanner") as scanner_cls, \
-             patch("sys.argv", ["quanttape", "scan", r"E:\repo\bot.py", "--git-history"]), \
-             patch("sys.stdout", new_callable=io.StringIO):
+             patch("quanttape.cli._print_banner"), \
+             patch("quanttape.cli.format_results", return_value=None), \
+             patch("sys.argv", ["quanttape", "scan", r"E:\repo\bot.py", "--git-history"]):
             scanner = scanner_cls.return_value
             scanner.scan_file.return_value = []
             scanner.scan_git_history.return_value = []
