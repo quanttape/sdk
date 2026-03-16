@@ -45,12 +45,15 @@ class RulePatternTests(unittest.TestCase):
         pattern = _compiled_rule("Infinite Loop Risk")
         self.assertIsNotNone(pattern.search("while True:"))
         self.assertIsNotNone(pattern.search("    while True:  # daemon"))
+        self.assertIsNotNone(pattern.search("while 1:"))
+        self.assertIsNotNone(pattern.search("    while 1:  # spin"))
 
     def test_infinite_loop_risk_ignores_noncanonical_loops(self):
         pattern = _compiled_rule("Infinite Loop Risk")
         self.assertIsNone(pattern.search("while not stopped:"))
         self.assertIsNone(pattern.search("if cond: while True:"))
         self.assertIsNone(pattern.search("while True: do_work()"))
+        self.assertIsNone(pattern.search("while 1: do_work()"))
 
     def test_hardcoded_ticker_symbol_matches_real_single_symbol_assignments(self):
         pattern = _compiled_rule("Hardcoded Ticker Symbol")
@@ -67,6 +70,8 @@ class RulePatternTests(unittest.TestCase):
         pattern = _compiled_rule("Sleep Without Kill Switch")
         self.assertIsNotNone(pattern.search("time.sleep(5)"))
         self.assertIsNotNone(pattern.search("time.sleep(0.25)  # poll"))
+        self.assertIsNotNone(pattern.search("time.sleep(0.5)"))
+        self.assertIsNotNone(pattern.search("time.sleep(1.0)"))
 
     def test_sleep_without_kill_switch_ignores_variable_or_inline_sleep(self):
         pattern = _compiled_rule("Sleep Without Kill Switch")
@@ -87,6 +92,57 @@ class RulePatternTests(unittest.TestCase):
         self.assertIsNone(pattern.search("shares = risk_budget / stop_distance"))
         self.assertIsNone(pattern.search("size = notional_cap / price"))
         self.assertIsNone(pattern.search("qty = clip(balance / price, 0, max_qty)"))
+
+
+    # --- Extended Hours Without Limit Order ---
+    def test_extended_hours_matches_true_assignments(self):
+        pattern = _compiled_rule("Extended Hours Without Limit Order")
+        self.assertIsNotNone(pattern.search("extended_hours=True"))
+        self.assertIsNotNone(pattern.search("extended_hours = True"))
+        self.assertIsNotNone(pattern.search('extended_hours: True'))
+
+    def test_extended_hours_ignores_false_or_variable(self):
+        pattern = _compiled_rule("Extended Hours Without Limit Order")
+        self.assertIsNone(pattern.search("extended_hours=False"))
+        self.assertIsNone(pattern.search("extended_hours = use_ext"))
+
+    # --- Leverage Without Cap ---
+    def test_leverage_without_cap_matches_bare_numeric(self):
+        pattern = _compiled_rule("Leverage Without Cap")
+        self.assertIsNotNone(pattern.search("leverage = 4"))
+        self.assertIsNotNone(pattern.search("margin_multiplier = 10"))
+        self.assertIsNotNone(pattern.search("margin_ratio = 2"))
+
+    def test_leverage_without_cap_ignores_capped_or_config(self):
+        pattern = _compiled_rule("Leverage Without Cap")
+        self.assertIsNone(pattern.search("leverage = min(4, max_leverage)"))
+        self.assertIsNone(pattern.search("leverage = config.get('leverage')"))
+        self.assertIsNone(pattern.search("margin_multiplier = env.MAX_LEVERAGE"))
+
+    # --- Hardcoded Notional Amount ---
+    def test_hardcoded_notional_matches_large_values(self):
+        pattern = _compiled_rule("Hardcoded Notional Amount")
+        self.assertIsNotNone(pattern.search("notional = 100000"))
+        self.assertIsNotNone(pattern.search("order_value = 50000"))
+        self.assertIsNotNone(pattern.search("trade_value = 25000"))
+
+    def test_hardcoded_notional_ignores_small_or_variable(self):
+        pattern = _compiled_rule("Hardcoded Notional Amount")
+        self.assertIsNone(pattern.search("notional = 999"))
+        self.assertIsNone(pattern.search("notional = computed_value"))
+        self.assertIsNone(pattern.search("order_value = get_notional()"))
+
+    # --- Hardcoded Crypto Pair ---
+    def test_hardcoded_crypto_pair_matches_common_pairs(self):
+        pattern = _compiled_rule("Hardcoded Crypto Pair")
+        self.assertIsNotNone(pattern.search('symbol="BTCUSDT"'))
+        self.assertIsNotNone(pattern.search("pair='ETH/USD'"))
+        self.assertIsNotNone(pattern.search('ticker="SOLUSDC"'))
+
+    def test_hardcoded_crypto_pair_ignores_variables_and_equity_tickers(self):
+        pattern = _compiled_rule("Hardcoded Crypto Pair")
+        self.assertIsNone(pattern.search("symbol = get_pair()"))
+        self.assertIsNone(pattern.search('symbol="AAPL"'))
 
 
 if __name__ == "__main__":

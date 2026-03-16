@@ -252,14 +252,14 @@ TRADING_LOGIC_RULES: List[Rule] = [
     ),
     Rule(
         name="Infinite Loop Risk",
-        pattern=r"^\s*while\s+True\s*:\s*(?:#.*)?$",
+        pattern=r"^\s*while\s+(?:True|1)\s*:\s*(?:#.*)?$",
         severity="LOW",
         description="Infinite loop detected. Ensure there is a break condition or kill switch to prevent runaway execution.",
         category="trading_logic",
     ),
     Rule(
         name="Sleep Without Kill Switch",
-        pattern=r"(?ix)^\s*time\.sleep\(\s*(?:[1-9]\d*(?:\.\d+)?|0?\.\d{2,})\s*\)\s*(?:\#.*)?$",
+        pattern=r"(?ix)^\s*time\.sleep\(\s*(?:[1-9]\d*(?:\.\d+)?|0?\.\d+)\s*\)\s*(?:\#.*)?$",
         severity="LOW",
         description="Hardcoded numeric sleep detected. Prefer configurable polling intervals with explicit shutdown/kill-switch checks around the loop.",
         category="trading_logic",
@@ -269,6 +269,36 @@ TRADING_LOGIC_RULES: List[Rule] = [
         pattern=r"(?i)\b(?:symbol|ticker)\s*=\s*['\"](?!ALL\b|NONE\b|AUTO\b)[A-Z]{1,5}['\"]",
         severity="LOW",
         description="Hardcoded ticker symbol. Consider making this configurable for reusability and testing.",
+        category="trading_logic",
+    ),
+    Rule(
+        name="Extended Hours Without Limit Order",
+        pattern=r"(?i)extended_hours\s*[=:]\s*True",
+        severity="HIGH",
+        description="Extended hours trading requires limit orders with time_in_force=day. Market orders and non-day TIF are rejected in extended sessions.",
+        category="trading_logic",
+    ),
+    Rule(
+        name="Leverage Without Cap",
+        pattern=r"(?ix)^\s*(?:leverage|margin_multiplier|margin_ratio)\s*=\s*"
+                r"(?!.*\b(?:min|max|cap|limit|clamp|config|env|setting)\b)"
+                r"\d+",
+        severity="HIGH",
+        description="Leverage or margin multiplier set without an explicit cap or config reference. Over-leverage amplifies losses and can trigger margin calls.",
+        category="trading_logic",
+    ),
+    Rule(
+        name="Hardcoded Notional Amount",
+        pattern=r"(?ix)\b(?:notional|order_value|trade_value)\s*=\s*['\"]?\d{5,}['\"]?",
+        severity="MEDIUM",
+        description="Large hardcoded notional/dollar amount in order. Use calculated position sizing with risk budgets instead of fixed dollar values.",
+        category="trading_logic",
+    ),
+    Rule(
+        name="Hardcoded Crypto Pair",
+        pattern=r"(?i)\b(?:symbol|ticker|pair)\s*=\s*['\"](?:[A-Z]{2,5}(?:USDT|BUSD|USD|USDC|BTC|ETH)|[A-Z]{2,5}/[A-Z]{2,5})['\"]",
+        severity="LOW",
+        description="Hardcoded crypto trading pair. Consider making this configurable for reusability across markets and testing.",
         category="trading_logic",
     ),
 ]
@@ -372,6 +402,7 @@ def load_custom_rules(config_path: str) -> List[Rule]:
                 pattern=entry["pattern"],
                 severity=entry.get("severity", "MEDIUM"),
                 description=entry.get("description", ""),
+                category=entry.get("category", "general"),
             )
         )
     return rules
