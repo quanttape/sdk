@@ -1,12 +1,46 @@
 # Changelog
 
-## 0.0.20 -- Real-Client MITM Validation
+## 0.0.22 - Scanner Rule Upgrades
+
+**Release date:** 2026-03-16
+
+4 new trading logic rules, 3 bug fixes, 45 total rules.
+
+### New Rules
+
+- **Extended Hours Without Limit Order** (HIGH) - Flags `extended_hours=True` without limit order context. Market orders and non-day TIF are rejected in extended sessions.
+- **Leverage Without Cap** (HIGH) - Detects bare `leverage = 4` assignments with no min/max/config guard. Over-leverage amplifies losses and triggers margin calls.
+- **Hardcoded Notional Amount** (MEDIUM) - Catches large fixed dollar values like `notional = 100000`. Use calculated position sizing with risk budgets instead.
+- **Hardcoded Crypto Pair** (LOW) - Flags hardcoded crypto pairs like `symbol="BTCUSDT"` or `pair='ETH/USD'`. Make configurable for reusability.
+
+### Bug Fixes
+
+- **Infinite Loop Risk** - Now catches `while 1:` in addition to `while True:`
+- **Sleep Without Kill Switch** - Now matches single-decimal sleeps like `time.sleep(0.5)`
+- **Custom rule loading** - `load_custom_rules()` now reads `category` from YAML, so custom rules work with `--mode trading` and `--mode agent`
+
+---
+
+## 0.0.21 - Housekeeping
+
+**Release date:** 2026-03-15
+
+Cleanup release with no functional changes to the scanner or guard engines.
+
+- **License**: Changed from Proprietary to MIT
+- **README**: Rewritten with quick start guide, usage examples, and PyPI badges
+- **Text cleanup**: Removed em dashes and non-ASCII characters from comments, docstrings, and documentation
+- **CI**: Fixed live test exclusion and cross-platform CLI test compatibility
+
+---
+
+## 0.0.20 - Real-Client MITM Validation
 
 **Release date:** 2026-03-14
 
 This release marks the transition from "structurally validated" to "live MITM validated." The HTTPS interception path has been proven end-to-end with real HTTP clients through a trusted local CA.
 
-### HTTPS MITM -- Now Real-Client Validated
+### HTTPS MITM - Now Real-Client Validated
 
 - Validated with **curl**, **requests**, and **httpx** using a trusted local CA
 - 24 MITM live-validation tests covering: clean forward, blocked request, untrusted CA failure, secret in URL/header/body, binary passthrough, gzip body scanning, large body forwarding
